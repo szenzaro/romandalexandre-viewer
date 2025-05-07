@@ -1,0 +1,22 @@
+<span [ngbPopover]="popOverContent"
+      [popoverTitle]="popoverTitle()"
+      popoverClass="mw-100">
+
+    @if (isString()) {
+    {{ text() | decodeHtml}}
+    } @else {
+    {{ choice()?.regularization ?? "" | decodeHtml }} <!-- TODO: change visualisation -->
+    }
+</span>
+
+<ng-template #popOverContent>
+    Lemma: {{ word().lemma }} <br>
+    POS: {{ word().pos }} <br>
+    MSD: {{ word().msd }} <br>
+    @if (isString()) {
+    Text: {{ text() | decodeHtml}}
+    } @else {
+    Original Text: {{ choice()?.original ?? "" | decodeHtml }} <br>
+    Regularization: {{ choice()?.regularization ?? "" | decodeHtml }}
+    }
+</ng-template>
