@@ -1,22 +1,21 @@
-<span [ngbPopover]="popOverContent"
-      [popoverTitle]="popoverTitle()"
-      popoverClass="mw-100">
-
+<span (click)="op.toggle($event)"
+[class.highlighted]="isHighlighted()">
     @if (isString()) {
     {{ text() | decodeHtml}}
     } @else {
     {{ choice()?.regularization ?? "" | decodeHtml }} <!-- TODO: change visualisation -->
     }
 </span>
-
-<ng-template #popOverContent>
-    Lemma: {{ word().lemma }} <br>
-    POS: {{ word().pos }} <br>
-    MSD: {{ word().msd }} <br>
-    @if (isString()) {
-    Text: {{ text() | decodeHtml}}
-    } @else {
-    Original Text: {{ choice()?.original ?? "" | decodeHtml }} <br>
-    Regularization: {{ choice()?.regularization ?? "" | decodeHtml }}
-    }
-</ng-template>
+<p-popover #op>
+    <h2>{{ popoverTitle()}}</h2>
+    <p> Lemma: {{ word().lemma }} <br>
+        POS: {{ word().pos }} <br>
+        MSD: {{ word().msd }} <br>
+        @if (isString()) {
+        Text: {{ text() | decodeHtml}}
+        } @else {
+        Original Text: {{ choice()?.original ?? "" | decodeHtml }} <br>
+        Regularization: {{ choice()?.regularization ?? "" | decodeHtml }}
+        }
+    </p>
+</p-popover>
