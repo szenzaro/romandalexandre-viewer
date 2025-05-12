@@ -1,0 +1,18 @@
+<p-floatlabel variant="on">
+    <p-multiselect #ms
+                   [showClear]="true"
+                   [showToggleAll]="true"
+                   size="small"
+                   [options]="options()"
+                   (onClear)="selection.set([])"
+                   (onChange)="selection.set($event.value)"
+                   display="chip">
+        <ng-template #heasder>
+            <p-button text
+                      size="small"
+                      icon="pi pi-times"
+                      (onClick)="ms.updateModel([])" />
+        </ng-template>
+    </p-multiselect>
+    <label>{{ name() }}</label>
+</p-floatlabel>
