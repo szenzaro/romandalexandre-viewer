@@ -1,1 +1,16 @@
-<p>words-filter works!</p>
+<div class="flex m-2 items-center">
+  <p-button icon="pi pi-delete-left"
+            size="small"
+            (click)="clearSelection()">
+  </p-button>
+
+  <p-button size="small"
+            [icon]="op() === 'and' ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+            (click)="toggleOp()">
+  </p-button>
+  @for (k of data; track $index) {
+  <app-multiselect [options]="options[k.key]"
+                   [name]="k.label"
+                   (change)="updateSelection(k.key, $event)" />
+  }
+</div>
