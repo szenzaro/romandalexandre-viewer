@@ -1,6 +1,7 @@
 <div class="layout"> <!-- TODO: use display: grid? -->
-    <app-words-filter class="header"/>
+    <app-words-filter class="header" (filterChange)="filterService.currentFilter.set($event)"/>
     <!-- <div class="left"><img class="p-0 m-0" src="/images/download.png" style="max-width: 100%;"/></div> -->
+     <!-- <app-osd class="left"></app-osd> -->
     <app-page class="left" [page]="pages[0]" />
-    <app-page class="right" [page]="pages[1]" />
+    <app-page class="right" [page]="pages[0]" />
 </div>
