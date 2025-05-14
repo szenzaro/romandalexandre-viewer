@@ -1,7 +1,21 @@
 <div class="layout"> <!-- TODO: use display: grid? -->
-    <app-words-filter class="header" (filterChange)="filterService.currentFilter.set($event)"/>
-    <!-- <div class="left"><img class="p-0 m-0" src="/images/download.png" style="max-width: 100%;"/></div> -->
-     <!-- <app-osd class="left"></app-osd> -->
-    <app-page class="left" [page]="pages[0]" />
-    <app-page class="right" [page]="pages[0]" />
+    <div class="header">Header</div>
+    <div class="filter flex items-center basis-full">
+        <app-page-selector [pageIds]="pageIds()"
+                           [(page)]="pageId" />
+        <app-words-filter (filterChange)="filterService.currentFilter.set($event)" />
+
+    </div>
+    <app-osd class="images"
+             [page]="pageNumber()"
+             (pageChange)="pageId.set(pageIds()[$event])"
+             [localImages]="localImages"
+             sourceType="local">
+    </app-osd>
+
+    <!-- @if (page() !== undefined) { -->
+    <app-page class="text"
+              [page]="page()" />
+    <!-- } -->
+    <div class="footer">Footer</div>
 </div>
