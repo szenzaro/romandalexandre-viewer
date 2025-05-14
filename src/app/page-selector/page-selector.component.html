@@ -1,0 +1,15 @@
+<p-button (onClick)="prev()"
+          size="small"
+          [disabled]="page() === pageIds()[0]"
+          icon="pi pi-chevron-left"
+          severity="secondary" />
+<p-button (onClick)="next()"
+          size="small"
+          [disabled]="page() === pageIds()[pageIds().length-1]"
+          icon="pi pi-chevron-right"
+          severity="secondary" />
+<p-select size="small"
+          [options]="pageIds()"
+          [(ngModel)]="page"
+          [filter] />
+
