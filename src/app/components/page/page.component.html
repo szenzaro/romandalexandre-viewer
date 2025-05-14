@@ -1,7 +1,9 @@
-@for (note of page().notes; track $index) {
-<app-note [note]="note" />
-}
+<div class="m-4">
+    @for (note of page().notes; track $index) {
+    <app-note [note]="note" />
+    }
 
-@for (lassa of page().lassas; track lassa.n) {
-<app-lassa [lassa]="lassa" />
-}
+    @for (lassa of page().lassas; track lassa.n) {
+    <app-lassa [lassa]="lassa" />
+    }
+</div>

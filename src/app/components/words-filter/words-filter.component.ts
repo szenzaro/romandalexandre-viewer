@@ -14,6 +14,7 @@ import {
   FilterSelection,
   WordsFilter,
 } from "../../services/filter.service";
+import { capitalize } from "../../models";
 
 @Component({
   selector: "app-words-filter",
@@ -122,7 +123,4 @@ export class WordsFilterComponent {
   }
 }
 
-function capitalize(str: string): string {
-  if (!str) return "";
-  return str[0].toUpperCase() + str.slice(1);
-}
+
