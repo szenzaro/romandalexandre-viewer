@@ -44,3 +44,8 @@ export interface Page {
 //         <reg> prise </reg>
 //     </choice>
 // </w>
+
+export function capitalize(str: string): string {
+    if (!str) return "";
+    return str[0].toUpperCase() + str.slice(1);
+}
