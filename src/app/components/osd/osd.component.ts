@@ -22,19 +22,14 @@ import {
   computed,
   effect,
   ElementRef,
-  inject,
   input,
+  model,
   signal,
   untracked,
-  viewChild,
 } from "@angular/core";
 
-import { HttpClient } from "@angular/common/http";
-
-import { distinctUntilChanged, filter, map, switchMap } from "rxjs/operators";
-
+import { httpResource } from "@angular/common/http";
 import OpenSeadragon from "openseadragon";
-import { toObservable, toSignal } from "@angular/core/rxjs-interop";
 
 /*
 From:
@@ -77,49 +72,24 @@ function manifestResourcetoTileSource(
 
 @Component({
   selector: "app-osd",
-  imports: [],
   templateUrl: "./osd.component.html",
-  styleUrl: "./osd.component.scss",
+  styleUrls: ["./osd.component.scss"],
 })
 export class OsdComponent {
-  #http = inject(HttpClient);
-
-  #commonOptions: OpenSeadragon.Options = {
-    visibilityRatio: 0.1,
-    minZoomLevel: 0.5,
-    defaultZoomLevel: 1,
-    sequenceMode: true,
-    showRotationControl: true,
-    prefixUrl:"/osd/images/",
-    navigatorBackground: "#606060",
-    showNavigator: false,
-    gestureSettingsMouse: {
-      clickToZoom: false,
-      dblClickToZoom: true,
-    },
-  };
+  #commonOptions: OpenSeadragon.Options;
 
   options = input<OpenSeadragon.Options>({});
-  sourceType = input<"manifest" | "local">("local");
-  manifestURL = input<string>("");
-  localImages = input<string[]>([
-    "osd/manuscript/Ms_Correr_1r.jpg",
-    "/osd/manuscript/Ms_Correr_1r.jpg",
-    "http://localhost:4200/osd/manuscript/Ms_Correr_1r.jpg",
-    "http://localhost:4200/osd/manuscript/Ms_Correr_1v.jpg",
-  ]);
+  manifestURL = input<string>();
+  sourceType = input<"local" | "manifest">("local");
 
-  page = signal(0);
+  page = model(0);
   viewer = signal<OpenSeadragon.Viewer | undefined>(undefined);
-
-  el = viewChild.required<ElementRef<HTMLDivElement>>("osdElem");
 
   #instanceOptions = computed(() => ({
     ...this.#commonOptions,
     ...this.options(),
-    element: this.el().nativeElement,
     showFullPageControl: false,
-    // tileSources: { type: "image", url:"/osd/manuscript/Ms_Correr_1r.jpg"},
+    showSequenceControl: false,
     tileSources: this.tileSources(),
     initialPage: this.page(),
   }));
@@ -135,62 +105,65 @@ export class OsdComponent {
 
       const v = OpenSeadragon(opts);
       v.addHandler("page", ({ page }) => this.page.set(page)); // TODO: add handler cleanup on destroy
-      v.element.style.position = "absolute";
-      // this.viewer.addHandler('open', () => {
-      //   let printButton = new Button({
-      //     tooltip: 'Print',
-      //     srcRest: `/assets/osd/colors_invert_icon.png`,
-      //     srcGroup: `/assets/osd/colors_invert_icon.png`,
-      //     srcHover: `/assets/osd/colors_invert_icon.png`,
-      //     srcDown: `/assets/osd/colors_invert_icon.png`,
-      //     onClick: () => alert('hello'),
-      //   });
-
-      //   this.viewer.addControl(printButton.element, { anchor: ControlAnchor.TOP_LEFT });
-      // });
-
       this.viewer.set(v);
-      console.log(v)
     });
   });
 
-  localImagesTileSources = computed(() => ({
-    type: "image",
-    url: this.localImages()[0],
-  }));
-  manifestTileSources = toSignal<OpenSeadragon.TileSource[]>( // TODO: change to resource when upgraded to angular 19
-    toObservable(this.manifestURL).pipe(
-      filter((url) => !!url),
-      distinctUntilChanged(),
-      switchMap((url) =>
-        this.#http.get<{ sequences: Partial<Array<{ canvases: any[] }>> }>(
-          url!,
-        )
-      ), // TODO: check  if there is an already defined type for manifest
-      map((manifest) =>
-        manifest // get the resource fields in the manifest json structure
-          .sequences.map((seq) =>
-            seq!.canvases.map((canv) => canv.images).reduce(
-              (x, y) => x.concat(y),
-              [],
-            )
-          ) // TODO: check if seq can be undefined
-          .reduce((x, y) => x.concat(y), []).map((res: { resource: any }) =>
-            res.resource
-          ) // TODO: check if there is an already defined type for res
-          .map(manifestResourcetoTileSource)
-      ),
-    ),
-  );
+  manifestResource = httpResource<
+    { sequences: Partial<Array<{ canvases: any[] }>> }
+  >(() => this.manifestURL());
+  manifestTileSources = computed(() => {
+    const v = this.manifestResource.value();
+    if (v === undefined) {
+      return [];
+    }
 
-  tileSources = computed(() =>
-    this.sourceType() === "local"
-      ? this.localImages() ?? []
-      : this.manifestTileSources() ?? []
-  );
+    return v.sequences.map((seq) =>
+      seq!.canvases.map((canv) => canv.images).reduce(
+        (x, y) => x.concat(y),
+        [],
+      )
+    ) // TODO: check if seq can be undefined
+      .reduce((x, y) => x.concat(y), []).map((res: { resource: any }) =>
+        res.resource
+      ) // TODO: check if there is an already defined type for res
+      .map(manifestResourcetoTileSource);
+  });
+
+  localImages = input<string[]>([]);
+  localTileSources = computed(() => this.localImages().map(urlToTileSource));
+
+  tileSources = computed(() => {
+    if (this.sourceType() === "local") {
+      return this.localTileSources();
+    }
+    return this.manifestTileSources();
+  });
 
   constructor(
     private elRef: ElementRef,
   ) {
+    this.#commonOptions = {
+      visibilityRatio: 0.1,
+      minZoomLevel: 0.5,
+      defaultZoomLevel: 1,
+      sequenceMode: true,
+      showRotationControl: true,
+      prefixUrl: "/osd/images/",
+      element: this.elRef.nativeElement,
+      navigatorBackground: "#606060",
+      showNavigator: false,
+      gestureSettingsMouse: {
+        clickToZoom: false,
+        dblClickToZoom: true,
+      },
+    };
   }
+}
+
+function urlToTileSource(url: string) {
+  return {
+    type: "image",
+    url,
+  };
 }
