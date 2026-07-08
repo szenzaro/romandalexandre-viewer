@@ -64,4 +64,4 @@ export type Contr =
     | ".DETrel"
     | ".PROrel";
 
-export type Spec = "it" | "probl";
+export type Spec = "it" | "probl" | "rim";

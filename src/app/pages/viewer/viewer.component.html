@@ -1,5 +1,7 @@
 <div class="layout"> <!-- TODO: use display: grid? -->
-    <div class="header">Header</div>
+    <div class="header">
+        <h1 class="text-4xl">Le Romand d'Alexandre del manoscritto Venezia, Biblioteca del Museo Correr, Correr 1493</h1>
+    </div>
     <div class="filter flex items-center basis-full">
         <app-page-selector [pageIds]="pageIds()"
                            [(page)]="pageId" />
@@ -17,5 +19,8 @@
     <app-page class="text"
               [page]="page()" />
     <!-- } -->
-    <div class="footer">Footer</div>
+    <div class="footer">
+            <span>CC BY-NC 4.0</span>
+            <span>Creative Commons Attribution-NonCommercial 4.0 International</span>
+    </div>
 </div>

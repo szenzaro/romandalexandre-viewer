@@ -103,7 +103,7 @@ export class WordsFilterComponent {
       ".DETrel",
       ".PROrel",
     ],
-    spec: ["it", "probl"],
+    spec: ["it", "probl", "rim"],
   };
 
   toggleOp() {
